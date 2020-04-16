@@ -56,13 +56,54 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	
 	int subblock_size = (int)subblock_size_float;
 	printf("Subblocks will each contain %d bytes of data\n",subblock_size); 
+	// That's 32 minimum. We will need unsigned long long ints.
 
 	//Compute n and prepare allocation for F
 	int n = ceil((long double)file_size/(long double)beta);
 	printf("Preparing for n=%d blocks\n", n);
 
 	//Now, we fill the blocs "vertically"
-	
+	//Manual allocation?
+	printf("Why does this statement segfault?\n");
+	unsigned long long int **file;
+	file = malloc(n*sizeof(*(unsigned long long int)));
+	for (int i = 0; i < n; i++) {
+		file[n] = malloc(m*sizeof(unsigned long long int));
+	}
+	printf("Did this segfault?\n");
+
+	char *buffer; int result; char *substring;
+	buffer = malloc(beta*sizeof(char));
+	substring = malloc(subblock_size*sizeof(char));
+	//Read from file. Big oof
+	for (int i = 0; i < n; i++) {
+		//Load beta data in memory
+		printf("Reading %dth block of data\n", i);
+		result = fread(buffer, 1, beta, file_descriptor);
+		if (result != beta) {
+			if (i == n-1) {
+				//Padding
+				printf("Now padding last block\n");
+			} else {
+				printf("File reading error for block %d\n", i);
+			}
+		}
+		//Split accross m
+		for (int j = 0; j < m; j++) {
+			//Extract substring
+			char *substring;
+			for (int l = 0; l < subblock_size; l++) {
+				substring[l]=buffer[j*subblock_size+l];
+			}
+			//Paste as ulli in file[]
+			file[i][j]=atoll(substring);
+		}
+	}
+	free(substring);
+	free(buffer);
+
+	//Tests
+	printf("%llu %llu %llu \n", file[0][1], file[0][1], file[0][2]);
 
 	return 0;
 }

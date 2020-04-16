@@ -8,6 +8,7 @@
 
 // Base functions
 void compute_block_hash(mpz_t result, mpz_t p, mpz_t q, int m, mpz_t g[m], mpz_t b[m]);
-void compute_g(mpz_t *result, mpz_t g0, int m, mpz_t r[m]);
+void generate_g(int m, mpz_t g[m], mpz_t p, int n);
+void compute_g_with_r(mpz_t *result, mpz_t g0, int m, mpz_t r[m]);
 
 #endif // HASHES_H
