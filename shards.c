@@ -1,13 +1,13 @@
 #include "shards.h"
 
-int read_blocks_from_file(char *file_name, int beta, int m) {
+void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz_t **blocks) {
 	unsigned long long int file_size; // Taking our precautions
 	FILE *file_descriptor;
 
 	file_descriptor = fopen(file_name, "r");
 	if (file_descriptor == NULL) {
 		printf("Error while reading file.");
-		return 1;
+		return;
 	}
 	file_size = read_file_size(file_descriptor);
 	
@@ -60,6 +60,7 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	//Compute n and prepare allocation for F
 	int n = ceil((long double)file_size/(long double)beta);
 	printf("Preparing for n=%d blocks\n", n);
+	*nb_blocks = n;
 
 	//Now, we fill the blocs "vertically"
 	//Manual allocation, (2d) arrays are horrible to use
@@ -67,7 +68,7 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	file = malloc(n*m*sizeof(mpz_t));
 	if (file == NULL) {
 		printf("Error in malloc.\n");
-		return 1;
+		return;
 	}
 
 	for (int i = 0; i < n; i++) {
@@ -77,7 +78,7 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	}
 
 	char *buffer; int result;
-	buffer = malloc(beta*sizeof(char));
+	buffer = calloc(1, beta*sizeof(char));
 	char substring[m];
 	mpz_t import;
 	mpz_init(import);
@@ -120,6 +121,9 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	mpz_clear(import);
 	free(buffer);
 
+	//Close file
+	fclose(file_descriptor);
+
 	//Tests
 	printf("Block extract:\n");
 	gmp_printf("%Zd %Zd %Zd \n", file[0], file[1], file[2]);
@@ -139,15 +143,17 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 
 	free(export);
 
-	for (int i = 0; i < n; i++) {
+	/*for (int i = 0; i < n; i++) {
 		for (int j = 0; j < m; j++) {
 			mpz_clear(file[i * m + j]);
 		}
 	}
 
-	free(file);
+	free(file); */
 
-	return 0;
+	//Return
+	*blocks = file;
+	//return file;
 }
 
 unsigned long long int read_file_size(FILE *file_descriptor) {
@@ -157,3 +163,13 @@ unsigned long long int read_file_size(FILE *file_descriptor) {
 	return size;
 }
 
+void free_blocks(int n, int m, mpz_t *matrix) {
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			mpz_clear(matrix[i * m + j]);
+		}
+	}
+
+	free(matrix);
+}
