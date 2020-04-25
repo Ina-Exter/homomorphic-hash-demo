@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// beta 131072
-	int a = read_blocks_from_file(argv[1], 512, 512);
+	int a = read_blocks_from_file(argv[1], 512, 128);
 
 	return 0;
 

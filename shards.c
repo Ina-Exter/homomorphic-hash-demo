@@ -56,7 +56,6 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	
 	int subblock_size = (int)subblock_size_float;
 	printf("Subblocks will each contain %d bytes of data\n",subblock_size); 
-	// That's 32 minimum. We will need unsigned long long ints.
 
 	//Compute n and prepare allocation for F
 	int n = ceil((long double)file_size/(long double)beta);
@@ -126,14 +125,17 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	gmp_printf("%Zd %Zd %Zd \n", file[0], file[1], file[2]);
 
 	char *export;
-	export = calloc(1, subblock_size*sizeof(char));
+	export = malloc(subblock_size*sizeof(char) + 1);
 	printf("Block extract (translated):\n");
 	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[0]);
+	export[subblock_size] = '\0';
 	printf("%s ", export);
 	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[1]);
 	printf("%s ", export);
+	export[subblock_size] = '\0';
 	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[2]);
 	printf("%s\n", export);
+	export[subblock_size] = '\0';
 
 	free(export);
 
