@@ -63,47 +63,87 @@ int read_blocks_from_file(char *file_name, int beta, int m) {
 	printf("Preparing for n=%d blocks\n", n);
 
 	//Now, we fill the blocs "vertically"
-	//Manual allocation?
-	printf("Why does this statement segfault?\n");
-	unsigned long long int **file;
-	file = malloc(n*sizeof(*(unsigned long long int)));
-	for (int i = 0; i < n; i++) {
-		file[n] = malloc(m*sizeof(unsigned long long int));
+	//Manual allocation, (2d) arrays are horrible to use
+	mpz_t *file;
+	file = malloc(n*m*sizeof(mpz_t));
+	if (file == NULL) {
+		printf("Error in malloc.\n");
+		return 1;
 	}
-	printf("Did this segfault?\n");
 
-	char *buffer; int result; char *substring;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			mpz_init(file[i * m + j]);
+		}
+	}
+
+	char *buffer; int result;
 	buffer = malloc(beta*sizeof(char));
-	substring = malloc(subblock_size*sizeof(char));
+	char substring[m];
+	mpz_t import;
+	mpz_init(import);
 	//Read from file. Big oof
 	for (int i = 0; i < n; i++) {
 		//Load beta data in memory
 		printf("Reading %dth block of data\n", i);
 		result = fread(buffer, 1, beta, file_descriptor);
+		printf("Except %d bits, read %d bits\n", beta, result);
+		printf("read:\n%s\n", buffer);
 		if (result != beta) {
 			if (i == n-1) {
 				//Padding
-				printf("Now padding last block\n");
+				printf("Now padding last block with %d zeroes\n", beta - result);
+				for (int k = -1; k < (beta - result); k++) {
+					buffer[result + k] = '0';
+				}
+
 			} else {
 				printf("File reading error for block %d\n", i);
 			}
 		}
 		//Split accross m
+		//printf("Padded buffer:\n%s\n", buffer);
 		for (int j = 0; j < m; j++) {
 			//Extract substring
-			char *substring;
+			//printf("Substring %d extraction for block %d\n", j, i);
 			for (int l = 0; l < subblock_size; l++) {
+				//printf("%c\n", buffer[j*subblock_size+l]);
 				substring[l]=buffer[j*subblock_size+l];
 			}
-			//Paste as ulli in file[]
-			file[i][j]=atoll(substring);
+			//printf("Extracted substring:\n%s\n", substring);
+			// Import value
+			mpz_import(import, subblock_size, 1, sizeof(substring[0]), 0, 0, substring);
+			//gmp_printf("Value as int: %Zd\n", import);
+			//Paste as integer value in file
+			mpz_set(file[i * m + j], import);
 		}
 	}
-	free(substring);
+	mpz_clear(import);
 	free(buffer);
 
 	//Tests
-	printf("%llu %llu %llu \n", file[0][1], file[0][1], file[0][2]);
+	printf("Block extract:\n");
+	gmp_printf("%Zd %Zd %Zd \n", file[0], file[1], file[2]);
+
+	char *export;
+	export = calloc(1, subblock_size*sizeof(char));
+	printf("Block extract (translated):\n");
+	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[0]);
+	printf("%s ", export);
+	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[1]);
+	printf("%s ", export);
+	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[2]);
+	printf("%s\n", export);
+
+	free(export);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			mpz_clear(file[i * m + j]);
+		}
+	}
+
+	free(file);
 
 	return 0;
 }
@@ -114,3 +154,4 @@ unsigned long long int read_file_size(FILE *file_descriptor) {
 	rewind(file_descriptor);
 	return size;
 }
+
