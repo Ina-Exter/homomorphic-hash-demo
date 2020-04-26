@@ -1,4 +1,6 @@
 main
+filetest
+homomorphytest
 gmp-6.2.0/
 gmp-6.2.0.tar.xz
 *.swp

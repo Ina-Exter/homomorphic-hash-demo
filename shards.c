@@ -78,7 +78,7 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 	}
 
 	char *buffer; int result;
-	buffer = calloc(1, beta*sizeof(char));
+	buffer = calloc(1, beta*sizeof(char)+1);
 	char substring[m];
 	mpz_t import;
 	mpz_init(import);
@@ -87,6 +87,8 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 		//Load beta data in memory
 		printf("Reading %dth block of data\n", i);
 		result = fread(buffer, 1, beta, file_descriptor);
+		//Prevent from reading too far
+		buffer[result]='\0';
 		printf("Except %d bits, read %d bits\n", beta, result);
 		printf("read:\n%s\n", buffer);
 		if (result != beta) {
@@ -112,7 +114,7 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 			}
 			//printf("Extracted substring:\n%s\n", substring);
 			// Import value
-			mpz_import(import, subblock_size, 1, sizeof(substring[0]), 0, 0, substring);
+			mpz_import(import, subblock_size, 1, sizeof(substring[0]), 1, 0, substring);
 			//gmp_printf("Value as int: %Zd\n", import);
 			//Paste as integer value in file
 			mpz_set(file[i * m + j], import);
@@ -131,29 +133,20 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 	char *export;
 	export = malloc(subblock_size*sizeof(char) + 1);
 	printf("Block extract (translated):\n");
-	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[0]);
+	mpz_export(export, NULL, 1, subblock_size, 1, 0, file[0]);
 	export[subblock_size] = '\0';
 	printf("%s ", export);
-	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[1]);
+	mpz_export(export, NULL, 1, subblock_size, 1, 0, file[1]);
 	printf("%s ", export);
 	export[subblock_size] = '\0';
-	mpz_export(export, NULL, 1, subblock_size, 0, 0, file[2]);
+	mpz_export(export, NULL, 1, subblock_size, 1, 0, file[2]);
 	printf("%s\n", export);
 	export[subblock_size] = '\0';
 
 	free(export);
 
-	/*for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
-			mpz_clear(file[i * m + j]);
-		}
-	}
-
-	free(file); */
-
 	//Return
 	*blocks = file;
-	//return file;
 }
 
 unsigned long long int read_file_size(FILE *file_descriptor) {
@@ -172,4 +165,31 @@ void free_blocks(int n, int m, mpz_t *matrix) {
 	}
 
 	free(matrix);
+}
+
+void extract_block(int block_number, int m, mpz_t *matrix, mpz_t **block) {
+
+	mpz_t *b;
+	b = malloc(m*sizeof(mpz_t));
+	if (b == NULL) {
+		printf("Error in malloc.\n");
+		return;
+	}
+
+	for (int i = 0; i < m; i++) {
+		mpz_init_set(b[i], matrix[block_number * m + i]);
+	}
+
+	*block = b;
+
+}
+
+void free_block(int m, mpz_t *block) {
+
+	for (int i = 0; i < m; i++) {
+		mpz_clear(block[i]);
+	}
+
+	free(block);
+
 }
