@@ -31,9 +31,6 @@ int main(int argc, char *argv[]){
 
 	// Generate a vector g
 	mpz_t g[m];
-	for (int i = 0; i < m; i++) {
-		mpz_init(g[i]);
-	}
 	// n is used as seed for instance
 	generate_g(m, g, p, *nb_blocks);
 
@@ -113,9 +110,7 @@ int main(int argc, char *argv[]){
 	// Clearing cryptographic security values
 	mpz_clear(p);
 	mpz_clear(q);
-	for (int i = 0; i < m; i++) {
-		mpz_clear(g[i]);
-	}
+	clear_mpz_vector(m, g);
 
 	return 0;
 }

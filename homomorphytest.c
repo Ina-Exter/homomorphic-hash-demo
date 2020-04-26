@@ -16,9 +16,6 @@ int main(int argc, char *argv[]){
 	
 	// Generate a vector g
 	mpz_t g[m];
-	for (int i = 0; i < m; i++) {
-		mpz_init(g[i]);
-	}
 	generate_g(m, g, p, n);
 
 	//Curiosity: print g
@@ -99,9 +96,7 @@ int main(int argc, char *argv[]){
 	printf("Equality check (0 if equal) : %d\n", equal);
 
 	//Clear
-	for (int i = 0; i < m; i++) {
-		mpz_clear(g[i]);
-	}
+	clear_mpz_vector(m, g);
 	mpz_clear(p);
 	mpz_clear(q);
 	for (int i = 0; i < n; i++) {
