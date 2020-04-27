@@ -5,16 +5,17 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <inttypes.h>
 #include <gmp.h>
 
-void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz_t **blocks);
+void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name, uint32_t beta, uint32_t m);
 
-unsigned long long int read_file_size(FILE *file_descriptor);
+uint64_t read_file_size(FILE *file_descriptor);
 
-void free_blocks(int n, int m, mpz_t *matrix);
+void free_blocks(uint32_t n, uint32_t m, mpz_t *matrix);
 
-void extract_block(int block_number, int m, mpz_t *matrix, mpz_t **block);
+void extract_block(mpz_t **block, uint32_t block_number, uint32_t m, mpz_t *matrix);
 
-void free_block(int m, mpz_t *block);
+void free_block(uint32_t m, mpz_t *block);
 
 #endif // SHARDS_H

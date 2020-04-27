@@ -5,9 +5,9 @@
 int main(int argc, char *argv[]){
 
 	//Constants
-	int beta = 16384;
-	int n = 32;
-	int m = 512;
+	uint32_t beta = 16384;
+	uint32_t n = 32;
+	uint32_t m = 512;
 
 	//GMP values
 	mpz_t p, q;
@@ -19,16 +19,16 @@ int main(int argc, char *argv[]){
 	generate_g(m, g, p, n);
 
 	//Curiosity: print g
-	for (int i = 0; i < m; i++) {
+	for (uint32_t i = 0; i < m; i++) {
 		gmp_printf("g[%d] = %Zd\n", i, g[i]);
 	}
 
 	//Select a matrix f and here we go
 	// For now, generating with GMP cause simpler to modulo-sum
 	mpz_t f[n][m];
-	unsigned long int sum;
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
+	uint32_t sum;
+	for (uint32_t i = 0; i < n; i++) {
+		for (uint32_t j = 0; j < m; j++) {
 			sum = 1 + i + j;
 			mpz_init_set_ui(f[i][j], sum);
 		}
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
 	mpz_t block_one_plus_two[m];
 	mpz_t agg;
 	mpz_init(agg);
-	for (int i = 0; i < m; i++) {
+	for (uint32_t i = 0; i < m; i++) {
 		mpz_add(agg, f[0][i], f[1][i]);
 		// Additions on Zq?
 		mpz_mod(agg, agg, q);
@@ -99,14 +99,14 @@ int main(int argc, char *argv[]){
 	clear_mpz_vector(m, g);
 	mpz_clear(p);
 	mpz_clear(q);
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
+	for (uint32_t i = 0; i < n; i++) {
+		for (uint32_t j = 0; j < m; j++) {
 			mpz_clear(f[i][j]);
 		}
 	}
 
 	mpz_clear(agg);
-	for (int i = 0; i < m; i++) {
+	for (uint32_t i = 0; i < m; i++) {
 		mpz_clear(block_one_plus_two[i]);
 	}
 

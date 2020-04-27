@@ -1,7 +1,7 @@
 #include "shards.h"
 
-void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz_t **blocks) {
-	unsigned long long int file_size; // Taking our precautions
+void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name, uint32_t beta, uint32_t m) {
+	uint64_t file_size; // Taking our precautions
 	FILE *file_descriptor;
 
 	file_descriptor = fopen(file_name, "r");
@@ -12,7 +12,7 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 	file_size = read_file_size(file_descriptor);
 	
 	// File size
-	printf("File size in bytes %llu\n", file_size);
+	printf("File size in bytes %lu\n", file_size);
 	
 	// Raw block size
 	/* Legacy code if beta and m are given/fixed
@@ -54,11 +54,11 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 	printf("beta/m ratio = %.5f\n", subblock_size_float);
 	assert(subblock_size_float==floor(subblock_size_float) && (subblock_size_float)==ceil(subblock_size_float));
 	
-	int subblock_size = (int)subblock_size_float;
-	printf("Subblocks will each contain %d bytes of data\n",subblock_size); 
+	uint32_t subblock_size = (uint32_t)subblock_size_float;
+	printf("Subblocks will each contain %d bytes of data\n", subblock_size); 
 
 	//Compute n and prepare allocation for F
-	int n = ceil((long double)file_size/(long double)beta);
+	uint32_t n = ceil((long double)file_size/(long double)beta);
 	printf("Preparing for n=%d blocks\n", n);
 	*nb_blocks = n;
 
@@ -71,31 +71,33 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 		return;
 	}
 
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
+	for (uint32_t i = 0; i < n; i++) {
+		for (uint32_t j = 0; j < m; j++) {
 			mpz_init(file[i * m + j]);
 		}
 	}
 
-	char *buffer; int result;
+	char *buffer; uint32_t result;
 	buffer = calloc(1, beta*sizeof(char)+1);
-	char substring[m];
+	char substring[subblock_size];
 	mpz_t import;
 	mpz_init(import);
 	//Read from file. Big oof
-	for (int i = 0; i < n; i++) {
+	for (uint32_t i = 0; i < n; i++) {
 		//Load beta data in memory
-		printf("Reading %dth block of data\n", i);
+		//printf("Reading %dth block of data\n", i);
 		result = fread(buffer, 1, beta, file_descriptor);
+		//printf("Expected %d bits, read %d bits\n", beta, result);
 		//Prevent from reading too far
 		buffer[result]='\0';
-		printf("Except %d bits, read %d bits\n", beta, result);
-		printf("read:\n%s\n", buffer);
+		//printf("read:\n%s\n", buffer);
 		if (result != beta) {
 			if (i == n-1) {
+				//Remove EOF
+				buffer[result - 1] = '0';
 				//Padding
-				printf("Now padding last block with %d zeroes\n", beta - result);
-				for (int k = -1; k < (beta - result); k++) {
+				//printf("Now padding last block with %d zeroes\n", beta - result);
+				for (uint32_t k = 0; k <= (beta - result); k++) {
 					buffer[result + k] = '0';
 				}
 
@@ -105,10 +107,11 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 		}
 		//Split accross m
 		//printf("Padded buffer:\n%s\n", buffer);
-		for (int j = 0; j < m; j++) {
+		for (uint32_t j = 0; j < m; j++) {
 			//Extract substring
 			//printf("Substring %d extraction for block %d\n", j, i);
-			for (int l = 0; l < subblock_size; l++) {
+			for (uint32_t l = 0; l < subblock_size; l++) {
+				//printf("Char %d is:\n", l);
 				//printf("%c\n", buffer[j*subblock_size+l]);
 				substring[l]=buffer[j*subblock_size+l];
 			}
@@ -126,40 +129,21 @@ void read_blocks_from_file(char *file_name, int beta, int m, int *nb_blocks, mpz
 	//Close file
 	fclose(file_descriptor);
 
-	//Tests
-	printf("Block extract:\n");
-	gmp_printf("%Zd %Zd %Zd \n", file[0], file[1], file[2]);
-
-	char *export;
-	export = malloc(subblock_size*sizeof(char) + 1);
-	printf("Block extract (translated):\n");
-	mpz_export(export, NULL, 1, subblock_size, 1, 0, file[0]);
-	export[subblock_size] = '\0';
-	printf("%s ", export);
-	mpz_export(export, NULL, 1, subblock_size, 1, 0, file[1]);
-	printf("%s ", export);
-	export[subblock_size] = '\0';
-	mpz_export(export, NULL, 1, subblock_size, 1, 0, file[2]);
-	printf("%s\n", export);
-	export[subblock_size] = '\0';
-
-	free(export);
-
 	//Return
 	*blocks = file;
 }
 
-unsigned long long int read_file_size(FILE *file_descriptor) {
+uint64_t read_file_size(FILE *file_descriptor) {
 	fseek(file_descriptor, 0, SEEK_END); 
-	unsigned long long int size = ftell(file_descriptor); 
+	uint64_t size = ftell(file_descriptor); 
 	rewind(file_descriptor);
 	return size;
 }
 
-void free_blocks(int n, int m, mpz_t *matrix) {
+void free_blocks(uint32_t n, uint32_t m, mpz_t *matrix) {
 
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
+	for (uint32_t i = 0; i < n; i++) {
+		for (uint32_t j = 0; j < m; j++) {
 			mpz_clear(matrix[i * m + j]);
 		}
 	}
@@ -167,7 +151,7 @@ void free_blocks(int n, int m, mpz_t *matrix) {
 	free(matrix);
 }
 
-void extract_block(int block_number, int m, mpz_t *matrix, mpz_t **block) {
+void extract_block(mpz_t **block, uint32_t block_number, uint32_t m, mpz_t *matrix) {
 
 	mpz_t *b;
 	b = malloc(m*sizeof(mpz_t));
@@ -176,7 +160,7 @@ void extract_block(int block_number, int m, mpz_t *matrix, mpz_t **block) {
 		return;
 	}
 
-	for (int i = 0; i < m; i++) {
+	for (uint32_t i = 0; i < m; i++) {
 		mpz_init_set(b[i], matrix[block_number * m + i]);
 	}
 
@@ -184,9 +168,9 @@ void extract_block(int block_number, int m, mpz_t *matrix, mpz_t **block) {
 
 }
 
-void free_block(int m, mpz_t *block) {
+void free_block(uint32_t m, mpz_t *block) {
 
-	for (int i = 0; i < m; i++) {
+	for (uint32_t i = 0; i < m; i++) {
 		mpz_clear(block[i]);
 	}
 

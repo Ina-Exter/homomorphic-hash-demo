@@ -1,9 +1,9 @@
 
 main: main.c hashes.c shards.c
-	gcc -std=c99 -o main main.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o main main.c hashes.c shards.c -lgmp -lm
 
 homomorphy-test: homomorphytest.c hashes.c
-	gcc -std=c99 -o homomorphytest homomorphytest.c hashes.c -lgmp -lm
+	gcc -std=c99 -o homomorphytest homomorphytest.c hashes.c shards.c -lgmp -lm
 
 filetest: filetest.c shards.c
 	gcc -std=c99 -o filetest filetest.c shards.c -lgmp -lm	

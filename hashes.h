@@ -2,13 +2,15 @@
 #define HASHES_H
 
 #include <gmp.h>
+#include <inttypes.h>
+#include "shards.h"
 
-void compute_block_hash(mpz_t result, mpz_t p, mpz_t q, int m, mpz_t g[m], mpz_t b[m]);
+void compute_block_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t m, mpz_t g[m], mpz_t b[m]);
 
-void generate_g(int m, mpz_t g[m], mpz_t p, int seed);
+void generate_g(uint32_t m, mpz_t g[m], mpz_t p, uint32_t seed);
 
-void compute_g_with_r(mpz_t *result, mpz_t g0, int m, mpz_t r[m]);
+void clear_mpz_vector(uint32_t size, mpz_t *vector);
 
-void clear_mpz_vector(int size, mpz_t *vector);
+void compute_file_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t n, uint32_t m, mpz_t g[m], mpz_t *f);
 
 #endif // HASHES_H
