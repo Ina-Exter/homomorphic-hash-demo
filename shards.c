@@ -1,6 +1,6 @@
 #include "shards.h"
 
-void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name, uint32_t beta, uint32_t m) {
+void read_blocks_from_file(mpz_t **blocks, uint32_t *nb_blocks, char *file_name, uint32_t beta, uint32_t m) {
 	uint64_t file_size; // Taking our precautions
 	FILE *file_descriptor;
 
@@ -12,38 +12,8 @@ void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name
 	file_size = read_file_size(file_descriptor);
 	
 	// File size
-	printf("File size in bytes %lu\n", file_size);
+	//printf("File size in bytes %lu\n", file_size);
 	
-	// Raw block size
-	/* Legacy code if beta and m are given/fixed
-	unsigned long long int raw_block_size;
-	raw_block_size = (file_size/nb_blocks) + 1; // adding one as a precaution
-
-	printf("Raw block size \"beta\": %llu\n", raw_block_size);
-
-	//TEST: Block size to 16KB
-	//raw_block_size = 16 * 8 * 1024;
-	//RESULT: We indeed get m=512
-
-	// To decide the number of fragments per block (aka "m"), calculate it and round up to next power of 2
-	unsigned long long int fragment_number;
-	fragment_number = raw_block_size/(lambda_q-1);
-	printf("unrounded fragment size %llu\n", fragment_number);
-	// "Bit twiddling hack"?
-	// "It just works". Source: dude trust me.
-	fragment_number --;
-	fragment_number |= fragment_number >> 1;
-	fragment_number |= fragment_number >> 2;
-	fragment_number |= fragment_number >> 4;
-	fragment_number |= fragment_number >> 8;
-	fragment_number |= fragment_number >> 16;
-	fragment_number |= fragment_number >> 32;
-	fragment_number++;
-
-	printf("Number of sub-blocks per block, called \"m\" in paper: %llu\n", fragment_number);
-	
-	END LEGACY*/
-
 	// LET beta and m be fixed.
 	// Let F be a file of size t, and n the amount of blocks so that each block is exactly beta in weight and has m sub-blocks
 	// Each sub block contains exactly gamma=beta/m bits
@@ -51,21 +21,21 @@ void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name
 	
 	// Should we assume that beta/m is an integer? Would simplify things a lot
 	float subblock_size_float=((float)beta)/((float)m);
-	printf("beta/m ratio = %.5f\n", subblock_size_float);
+	//printf("beta/m ratio = %.5f\n", subblock_size_float);
 	assert(subblock_size_float==floor(subblock_size_float) && (subblock_size_float)==ceil(subblock_size_float));
 	
 	uint32_t subblock_size = (uint32_t)subblock_size_float;
-	printf("Subblocks will each contain %d bytes of data\n", subblock_size); 
+	//printf("Subblocks will each contain %d bytes of data\n", subblock_size); 
 
 	//Compute n and prepare allocation for F
 	uint32_t n = ceil((long double)file_size/(long double)beta);
-	printf("Preparing for n=%d blocks\n", n);
+	//printf("Preparing for n=%d blocks\n", n);
 	*nb_blocks = n;
-
+	
 	//Now, we fill the blocs "vertically"
 	//Manual allocation, (2d) arrays are horrible to use
 	mpz_t *file;
-	file = malloc(n*m*sizeof(mpz_t));
+	file = malloc((size_t)n*m*sizeof(mpz_t));
 	if (file == NULL) {
 		printf("Error in malloc.\n");
 		return;
@@ -78,7 +48,7 @@ void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name
 	}
 
 	char *buffer; uint32_t result;
-	buffer = calloc(1, beta*sizeof(char)+1);
+	buffer = calloc(1, (beta + 1)*sizeof(char));
 	char substring[subblock_size];
 	mpz_t import;
 	mpz_init(import);
@@ -89,7 +59,7 @@ void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name
 		result = fread(buffer, 1, beta, file_descriptor);
 		//printf("Expected %d bits, read %d bits\n", beta, result);
 		//Prevent from reading too far
-		buffer[result]='\0';
+		buffer[result-1]='\0';
 		//printf("read:\n%s\n", buffer);
 		if (result != beta) {
 			if (i == n-1) {

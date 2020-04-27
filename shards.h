@@ -8,7 +8,7 @@
 #include <inttypes.h>
 #include <gmp.h>
 
-void read_blocks_from_file(mpz_t **blocks, uintptr_t *nb_blocks, char *file_name, uint32_t beta, uint32_t m);
+void read_blocks_from_file(mpz_t **blocks, uint32_t *nb_blocks, char *file_name, uint32_t beta, uint32_t m);
 
 uint64_t read_file_size(FILE *file_descriptor);
 

@@ -11,9 +11,9 @@ int main(int argc, char *argv[]) {
 	uint32_t beta = 512;
 	uint32_t m = 128;
 	uint32_t subblock_size = beta/m;
-	uintptr_t *nb_blocks;
+	uint32_t *nb_blocks;
 	nb_blocks = malloc(sizeof(uint32_t));
-	*nb_blocks = 0;
+	*nb_blocks = (uint32_t)0;
 	mpz_t *blocks;
 	read_blocks_from_file(&blocks, nb_blocks, argv[1], beta, m);
 

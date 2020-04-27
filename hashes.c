@@ -53,7 +53,7 @@ void clear_mpz_vector(uint32_t size, mpz_t *vector) {
 
 void compute_file_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t n, uint32_t m, mpz_t g[m], mpz_t *f) {
 
-	printf("Being file hash computation. This can take up to 360 seconds for 100MB...\n");
+	//printf("Being file hash computation. This can take up to 360 seconds for 100MB...\n");
 	mpz_t agg;
 	mpz_init(agg);
 	//Extract block 1

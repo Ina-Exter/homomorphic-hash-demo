@@ -5,16 +5,22 @@
 
 int main(int argc, char *argv[]){
 
-	if (argc <= 1) {
-		printf("Missing argument: filename\n");
+	if (argc <= 3) {
+		printf("Missing argument. Order: filename beta m\n");
 		return 0;
 	}
 
 	//Constants
-	uint32_t beta = 1024;
-	uint32_t m = 4;
+	//uint32_t beta = 1024;
+	//uint32_t m = 64;
+	uint32_t beta = (uint32_t)atoi(argv[2]);
+	uint32_t m = (uint32_t)atoi(argv[3]);
 
-	printf("Beta=%d, m=%d\n", beta, m);
+	//Time
+	clock_t start, end;
+	double cpu_time_used;
+
+	//printf("Beta=%d, m=%d\n", beta, m);
 
 	//GMP values
 	mpz_t p, q;
@@ -24,20 +30,20 @@ int main(int argc, char *argv[]){
 	// Read a file for a matrix f
 	// f is a simple array. Each line has m values, so to access f[i][j], compute f[i * m + j]
 	mpz_t *f;
-	uintptr_t *nb_blocks;
+	uint32_t *nb_blocks;
 	nb_blocks = malloc(sizeof(uint32_t));
 	*nb_blocks = 0;
 	read_blocks_from_file(&f, nb_blocks, argv[1], beta, m);
 
-	printf("File divided in n=%lu blocks\n", *nb_blocks);
+	//printf("File divided in n=%lu blocks\n", *nb_blocks);
 	
-	if (*nb_blocks <= 1) {
+	/*if (*nb_blocks <= 1) {
 		printf("Only 1 block available. Abort and change settings.\n");
 		mpz_clears(p, q, NULL);
 		free_blocks(*nb_blocks, m, f);
 		free(nb_blocks);
 		return 1;
-	}
+	}*/
 
 	// Generate a vector g
 	mpz_t g[m];
@@ -45,7 +51,7 @@ int main(int argc, char *argv[]){
 	generate_g(m, g, p, *nb_blocks);
 
 	// Extract block 1 and 2
-	mpz_t *block1, *block2;
+	/*mpz_t *block1, *block2;
 	extract_block(&block1, 0, m, f);
 	extract_block(&block2, 1, m, f);
 
@@ -63,10 +69,6 @@ int main(int argc, char *argv[]){
 	// Compute hash of block 1, hash of block 2, hash of block 1+2 and product of hashes 1&2
 	mpz_t b1h, b2h, b1plus2h, b1htimesb2h;
 	mpz_inits(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
-
-	// Time
-	clock_t start, end;
-	double cpu_time_used;
 
 	printf("Compute block hases 1 and 2\n");
 	start = clock();
@@ -109,28 +111,28 @@ int main(int argc, char *argv[]){
 	gmp_printf("%Zd\n%Zd\n%Zd\n", f[0], f[1], f[m-1]);
 	printf("Block extract for block1 extracted:\n");
 	gmp_printf("%Zd\n%Zd\n%Zd\n", block1[0], block1[1], block1[m-1]);
-
+	*/
 
 
 	//time for full file hash
-	printf("Compute file hash\n");
+	//printf("Compute file hash\n");
 	mpz_t filehash;
 	mpz_init(filehash);
 	start = clock();
 	compute_file_hash(filehash, p, q, *nb_blocks, m, g, f);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for hash of full file = %f\n", cpu_time_used);
-	gmp_printf("Full file hash %Zd\n", filehash);
+	//printf("Time taken for hash of full file = %f\n", cpu_time_used);
+	//gmp_printf("Full file hash %Zd\n", filehash);
 	mpz_clear(filehash);
 
 	// Clearing temporary values that serve to verify homomorphy
-	mpz_clears(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
+	/*mpz_clears(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
 	for (uint32_t i = 0; i < m; i++) {
 		mpz_clear(block_one_plus_two[i]);
 	}
 	free_block(m, block1);
-	free_block(m, block2);
+	free_block(m, block2);*/
 
 	// Clearing file values
 	free_blocks(*nb_blocks, m, f);
@@ -141,5 +143,19 @@ int main(int argc, char *argv[]){
 	mpz_clear(q);
 	clear_mpz_vector(m, g);
 
+	//Write data to file
+	FILE *test_file, *data_file;
+	test_file = fopen(argv[1], "r");
+	uint64_t test_file_size = read_file_size(test_file);
+	fclose(test_file);
+	printf("Time taken for hash of file size %lu = %f\n", test_file_size, cpu_time_used);
+
+	char *datafilename;
+	datafilename = malloc(1000*sizeof(char));
+	sprintf(datafilename, "data_beta_%u_m_%u.csv", beta, m);
+	data_file=fopen(datafilename, "a");
+	fprintf(data_file, "%lu, %f\n", test_file_size, cpu_time_used);
+
+	free(datafilename);
 	return 0;
 }
