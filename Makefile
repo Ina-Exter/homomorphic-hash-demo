@@ -8,6 +8,9 @@ homomorphy-test: homomorphytest.c hashes.c
 filetest: filetest.c shards.c
 	gcc -std=c99 -o filetest filetest.c shards.c -lgmp -lm	
 
+hashtime: hashtime.c hashes.c shards.c
+	gcc -std=c99 -Wall -Wextra -o hashtime hashtime.c hashes.c shards.c -lgmp -lm
+
 generate:
 	python3 generate_p_from_q.py
 
@@ -15,6 +18,6 @@ clean:
 	rm main filetest homomorphytest
 .PHONY: clean
 
-all: main homomorphy-test filetest
+all: main homomorphy-test filetest hashtime
 .PHONY: all
 

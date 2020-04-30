@@ -147,3 +147,58 @@ void free_block(uint32_t m, mpz_t *block) {
 	free(block);
 
 }
+
+void compute_compound_block(auxblock **result, uint32_t m, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]) {
+
+
+	//Malloc the struct
+	auxblock *auxb = malloc(sizeof(auxblock) + degree*sizeof(uint32_t));
+	if (result == NULL) {
+		printf("Error in malloc.\n");
+		return;
+	}
+	auxb->degree = degree;
+	//Malloc the indexes of blocks
+	for (uint32_t i = 0; i < degree; i++) { auxb->parts[i] = parts[i]; }
+
+	//Malloc the block
+	mpz_t *b = malloc(m*sizeof(mpz_t));
+	if (b == NULL) {
+		printf("Error in malloc.\n");
+		return;
+	}
+	// Oh yeah jimmy do NOT FORGET TO INIT THE BLOCK YOU SHITBUCKET
+	for (uint32_t i = 0; i < m; i++) { mpz_init(b[i]); }
+
+	printf("All mallocs passed \n");
+	//Compute
+	mpz_t *extracted_block;
+	for (uint32_t i = 0; i < degree; i++) {
+		//printf("Now attempting to extract block %u\n", parts[i]);
+		extract_block(&extracted_block, parts[i], m, matrix);
+		//printf("Extracted block %u\n", parts[i]);
+		for (uint32_t j = 0; j < m; j++) {
+			//printf("Add b[%u] and extracted_block[%u]\n", j, j);
+			mpz_add(b[j], b[j], extracted_block[j]);
+		}
+		//printf("Freeing block %u\n", parts[i]);
+		free_block(m, extracted_block);
+	}
+	//Mod
+	for (uint32_t i = 0; i < m; i++) {
+		mpz_mod(b[i], b[i], q);
+	}
+	
+	auxb->block = b;
+
+	*result = auxb;
+
+
+}
+
+void clear_compound_block(uint32_t m, auxblock *auxb) {
+
+	free_block(m, auxb->block);
+	free(auxb);
+
+}
