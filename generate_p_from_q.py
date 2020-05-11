@@ -50,9 +50,9 @@ def generate_prime_number(length=1024):
     return p
 
 while True:
-    q=generate_prime_number(257)
+    q=generate_prime_number(1025)
     p=q
-    for i in range(767):
+    for i in range(3071):
         p*=2
     p+=1
     if is_prime(p):

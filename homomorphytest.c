@@ -5,7 +5,8 @@
 int main(int argc, char *argv[]){
 
 	//Constants
-	uint32_t beta = 16384;
+	//uint32_t beta = 16384;
+	uint32_t beta = 65536;
 	uint32_t n = 32;
 	uint32_t m = 512;
 

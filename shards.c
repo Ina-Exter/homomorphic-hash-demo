@@ -148,7 +148,7 @@ void free_block(uint32_t m, mpz_t *block) {
 
 }
 
-void compute_compound_block(auxblock **result, uint32_t m, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]) {
+void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]) {
 
 
 	//Malloc the struct
@@ -170,13 +170,29 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t q, mpz_t *matri
 	// Oh yeah jimmy do NOT FORGET TO INIT THE BLOCK YOU SHITBUCKET
 	for (uint32_t i = 0; i < m; i++) { mpz_init(b[i]); }
 
-	printf("All mallocs passed \n");
+	//Init random
+	// Initialize state with degree
+	gmp_randstate_t state;
+	gmp_randinit_default(state);
+	gmp_randseed_ui(state, (unsigned long int)degree);
+	
+	// Prepare random val
+	mpz_t argument;
+	mpz_init(argument);
+	
 	//Compute
 	mpz_t *extracted_block;
 	for (uint32_t i = 0; i < degree; i++) {
 		//printf("Now attempting to extract block %u\n", parts[i]);
 		extract_block(&extracted_block, parts[i], m, matrix);
 		//printf("Extracted block %u\n", parts[i]);
+		// Compute random val
+		mpz_urandomm(argument, state, q);
+		//Multiply random val and extracted block
+		for (uint32_t k = 0; k < m; k++) {
+			mpz_mul(extracted_block[k], extracted_block[k], argument);
+			mpz_mod(extracted_block[k], extracted_block[k], p);
+		}
 		for (uint32_t j = 0; j < m; j++) {
 			//printf("Add b[%u] and extracted_block[%u]\n", j, j);
 			mpz_add(b[j], b[j], extracted_block[j]);
@@ -192,8 +208,10 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t q, mpz_t *matri
 	auxb->block = b;
 
 	*result = auxb;
-
-
+	
+	mpz_clear(argument);
+	//Clear state
+	gmp_randclear(state);
 }
 
 void clear_compound_block(uint32_t m, auxblock *auxb) {

@@ -27,7 +27,7 @@ void extract_block(mpz_t **block, uint32_t block_number, uint32_t m, mpz_t *matr
 
 void free_block(uint32_t m, mpz_t *block);
 
-void compute_compound_block(auxblock **result, uint32_t m, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]);
+void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]);
 
 void clear_compound_block(uint32_t m, auxblock *auxb);
 
