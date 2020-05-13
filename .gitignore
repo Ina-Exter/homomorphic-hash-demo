@@ -1,6 +1,10 @@
 main
 filetest
 homomorphytest
+auxblocktest
 gmp-6.2.0/
 gmp-6.2.0.tar.xz
 *.swp
+todo.txt
+test*
+full_dataset_gen.sh

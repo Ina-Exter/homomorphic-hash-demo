@@ -11,13 +11,16 @@ filetest: filetest.c shards.c
 hashtime: hashtime.c hashes.c shards.c
 	gcc -std=c99 -Wall -Wextra -o hashtime hashtime.c hashes.c shards.c -lgmp -lm
 
+auxblocktest: auxblocktest.c hashes.c shards.c
+	gcc -std=c99 -Wall -Wextra -o auxblocktest auxblocktest.c hashes.c shards.c -lgmp -lm
+
 generate:
 	python3 generate_p_from_q.py
 
 clean: 
-	rm main filetest homomorphytest
+	rm main filetest homomorphytest auxblocktest
 .PHONY: clean
 
-all: main homomorphytest filetest hashtime
+all: main homomorphytest filetest hashtime auxblocktest
 .PHONY: all
 
