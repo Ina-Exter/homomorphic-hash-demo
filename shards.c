@@ -143,7 +143,6 @@ void free_block(uint32_t m, mpz_t *block) {
 	for (uint32_t i = 0; i < m; i++) {
 		mpz_clear(block[i]);
 	}
-
 	free(block);
 
 }
@@ -158,8 +157,16 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 		return;
 	}
 	auxb->degree = degree;
-	//Malloc the indexes of blocks
+	//Copy the indexes of blocks
 	for (uint32_t i = 0; i < degree; i++) { auxb->parts[i] = parts[i]; }
+
+	//Malloc the part list
+	mpz_t *c = malloc(degree*sizeof(mpz_t));
+	if (c == NULL) {
+		printf("Error in malloc.\n");
+		return;
+	}
+	for (uint32_t i = 0; i < degree; i++) { mpz_init(c[i]); }
 
 	//Malloc the block
 	mpz_t *b = malloc(m*sizeof(mpz_t));
@@ -188,6 +195,8 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 		//printf("Extracted block %u\n", parts[i]);
 		// Compute random val
 		mpz_urandomm(argument, state, q);
+		//Store it
+		mpz_set(c[i], argument);
 		//Multiply random val and extracted block
 		for (uint32_t k = 0; k < m; k++) {
 			mpz_mul(extracted_block[k], extracted_block[k], argument);
@@ -205,6 +214,7 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 		mpz_mod(b[i], b[i], q);
 	}
 	
+	auxb->coeffs = c;
 	auxb->block = b;
 
 	*result = auxb;
@@ -215,7 +225,8 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 }
 
 void clear_compound_block(uint32_t m, auxblock *auxb) {
-
+	
+	free_block(auxb->degree, auxb->coeffs);
 	free_block(m, auxb->block);
 	free(auxb);
 

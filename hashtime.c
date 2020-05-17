@@ -37,104 +37,23 @@ int main(int argc, char *argv[]){
 
 	//printf("File divided in n=%lu blocks\n", *nb_blocks);
 	
-	/*if (*nb_blocks <= 1) {
-		printf("Only 1 block available. Abort and change settings.\n");
-		mpz_clears(p, q, NULL);
-		free_blocks(*nb_blocks, m, f);
-		free(nb_blocks);
-		return 1;
-	}*/
-
 	// Generate a vector g
 	mpz_t g[m];
 	// n is used as seed for instance
 	generate_g(m, g, p, *nb_blocks);
 
-	// Extract block 1 and 2
-	/*mpz_t *block1, *block2;
-	extract_block(&block1, 0, m, f);
-	extract_block(&block2, 1, m, f);
-
-	// compute compound block 1+2 from f
-	mpz_t block_one_plus_two[m];
-	mpz_t agg;
-	mpz_init(agg);
-	for (uint32_t i = 0; i < m; i++) {
-		mpz_add(agg, block1[i], block2[i]);
-		mpz_mod(agg, agg, q);
-		mpz_init_set(block_one_plus_two[i], agg);
-	}
-	mpz_clear(agg);
-
-	// Compute hash of block 1, hash of block 2, hash of block 1+2 and product of hashes 1&2
-	mpz_t b1h, b2h, b1plus2h, b1htimesb2h;
-	mpz_inits(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
-
-	printf("Compute block hases 1 and 2\n");
-	start = clock();
-	compute_block_hash(b1h, p, q, m, g, block1);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for hash of b1 = %f\n", cpu_time_used);
-
-	start = clock();
-	compute_block_hash(b2h, p, q, m, g, block2);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for hash of b2 = %f\n", cpu_time_used);
-
-	printf("Compute block hash of block(1+2)\n");
-	start = clock();
-	compute_block_hash(b1plus2h, p, q, m, g, block_one_plus_two);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for hash of b(1+2) = %f\n", cpu_time_used);
-	
-	printf("Compute product of block hash 1 and block hash 2\n");
-	start = clock();
-	mpz_addmul(b1htimesb2h, b1h, b2h);
-	mpz_mod(b1htimesb2h, b1htimesb2h, p);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for product of hashes = %f\n", cpu_time_used);
-
-	// Print values
-	gmp_printf("Hash of sum of blocks = %Zd\n", b1plus2h);
-	gmp_printf("Product of hashes of blocks =  %Zd\n", b1htimesb2h);
-
-	// Assert equality
-	int equal = mpz_cmp(b1plus2h, b1htimesb2h);
-	printf("Equality check (0 if equal) : %d\n", equal);
-
-	// Check blocks for errors?
-	printf("Block extract for block1 in matrix:\n");
-	gmp_printf("%Zd\n%Zd\n%Zd\n", f[0], f[1], f[m-1]);
-	printf("Block extract for block1 extracted:\n");
-	gmp_printf("%Zd\n%Zd\n%Zd\n", block1[0], block1[1], block1[m-1]);
-	*/
-
-
 	//time for full file hash
 	//printf("Compute file hash\n");
-	mpz_t filehash;
-	mpz_init(filehash);
+	mpz_t *filehash;
 	start = clock();
-	compute_file_hash(filehash, p, q, *nb_blocks, m, g, f);
+	compute_file_hash(&filehash, p, *nb_blocks, m, g, f);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	//printf("Time taken for hash of full file = %f\n", cpu_time_used);
 	//gmp_printf("Full file hash %Zd\n", filehash);
-	mpz_clear(filehash);
-
-	// Clearing temporary values that serve to verify homomorphy
-	/*mpz_clears(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
-	for (uint32_t i = 0; i < m; i++) {
-		mpz_clear(block_one_plus_two[i]);
-	}
-	free_block(m, block1);
-	free_block(m, block2);*/
 
 	// Clearing file values
+	free_block(*nb_blocks, filehash);
 	free_blocks(*nb_blocks, m, f);
 	free(nb_blocks);
 
@@ -155,6 +74,7 @@ int main(int argc, char *argv[]){
 	sprintf(datafilename, "data_beta_%u_m_%u.csv", beta, m);
 	data_file=fopen(datafilename, "a");
 	fprintf(data_file, "%lu, %f\n", test_file_size, cpu_time_used);
+	fclose(data_file);
 
 	free(datafilename);
 	return 0;

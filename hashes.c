@@ -1,7 +1,7 @@
 #include "hashes.h"
 
 
-void compute_block_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t m, mpz_t g[m], mpz_t b[m]) {
+void compute_block_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t b[m]) {
 	mpz_t hash, buff;
 	mpz_init_set_str(hash, "1", 10);
 	mpz_init(buff);
@@ -51,7 +51,7 @@ void clear_mpz_vector(uint32_t size, mpz_t *vector) {
 	for (uint32_t i = 0; i < size; i++) { mpz_clear(vector[i]); }
 }
 
-void compute_file_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t n, uint32_t m, mpz_t g[m], mpz_t *f) {
+/*void compute_file_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t n, uint32_t m, mpz_t g[m], mpz_t *f) {
 
 	//printf("Being file hash computation. This can take up to 360 seconds for 100MB...\n");
 	mpz_t agg;
@@ -60,15 +60,15 @@ void compute_file_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t n, uint32_t m, m
 	mpz_t *block;
 	extract_block(&block, 0, m, f);
 	//Compute its hash
-	compute_block_hash(agg, p, q, m, g, block); 
-	//Free it...?
+	compute_block_hash(agg, p, m, g, block); 
+	//Free it
 	free_block(m, block);
 	mpz_t agg2;
 	mpz_init(agg2);
 	for (uint32_t i = 1; i < n; i++) {
 		//printf("Handling block %d\n", i);
 		extract_block(&block, i, m, f);
-		compute_block_hash(agg2, p, q, m, g, block);
+		compute_block_hash(agg2, p, m, g, block);
 		free_block(m, block);
 		//printf("Aggregating block %d\n", i);
 		mpz_mul(agg, agg, agg2);
@@ -81,4 +81,60 @@ void compute_file_hash(mpz_t result, mpz_t p, mpz_t q, uint32_t n, uint32_t m, m
 
 	mpz_set(result, agg);
 	mpz_clear(agg);
+}*/
+
+void compute_file_hash(mpz_t **h_f, mpz_t p, uint32_t n, uint32_t m, mpz_t g[m], mpz_t *f) {
+
+	mpz_t *h = malloc(n*sizeof(mpz_t));
+	if (h == NULL) {
+		printf("Error in malloc.\n");
+		return;
+	}
+	for (uint32_t i = 0; i < n; i++) { mpz_init(h[i]); }
+	mpz_t agg;
+	mpz_init(agg);
+	mpz_t *block;
+	for (uint32_t i = 0; i < n; i++) {
+		//printf("Handling block %d\n", i);
+		extract_block(&block, i, m, f);
+		compute_block_hash(agg, p, m, g, block);
+		free_block(m, block);
+		//printf("Writing block %d\n", i);
+		mpz_set(h[i], agg);
+	}
+	//printf("Clearing\n");
+	mpz_clear(agg);
+	//printf("Setting\n");
+	*h_f = h;
+}
+
+bool check_auxblock_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t *h_f, auxblock *auxb) {
+
+	mpz_t auxblockhash, verify, bfactor;
+	uint32_t current_block;
+	mpz_init(auxblockhash); 
+	mpz_init_set_str(verify, "1", 10);
+	mpz_init(bfactor);
+
+	compute_block_hash(auxblockhash, p, m, g, auxb->block);
+	mpz_set(result, auxblockhash);
+
+	mpz_t agg;
+	mpz_init(agg);
+
+	for (uint32_t i = 0; i < auxb->degree; i++) {
+		current_block = auxb->parts[i];
+		mpz_set(bfactor, auxb->coeffs[i]);
+		mpz_set(agg, h_f[current_block]);
+		mpz_powm(agg, agg, bfactor, p);
+		mpz_mul(verify, verify, agg);
+		mpz_mod(verify, verify, p);	
+	}
+
+	mpz_clears(bfactor, agg, NULL);
+
+	int comp = mpz_cmp(auxblockhash, verify);
+
+	return (comp == 0);
+
 }

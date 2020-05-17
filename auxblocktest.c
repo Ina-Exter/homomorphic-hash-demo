@@ -165,6 +165,8 @@ int main(int argc, char *argv[]){
 	fprintf(data_file, "%d, %f\n", 50, t7);
 	fprintf(data_file, "%d, %f\n", 100, t8);
 
+	fclose(data_file);
+
 	free(datafilename);
 
 	return 0;

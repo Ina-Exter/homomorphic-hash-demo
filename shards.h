@@ -13,6 +13,7 @@ typedef struct auxblock auxblock;
 struct auxblock {
 
 	uint32_t degree;
+	mpz_t *coeffs;
 	mpz_t *block;
 	uint32_t parts[];
 };

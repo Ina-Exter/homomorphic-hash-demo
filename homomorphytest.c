@@ -61,20 +61,20 @@ int main(int argc, char *argv[]){
 
 	printf("Compute block hases 1 and 2\n");
 	start = clock();
-	compute_block_hash(b1h, p, q, m, g, f[0]);
+	compute_block_hash(b1h, p, m, g, f[0]);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for hash of b1 = %f\n", cpu_time_used);
 
 	start = clock();
-	compute_block_hash(b2h, p, q, m, g, f[1]);
+	compute_block_hash(b2h, p, m, g, f[1]);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for hash of b2 = %f\n", cpu_time_used);
 
 	printf("Compute block hash of block(1+2)\n");
 	start = clock();
-	compute_block_hash(b1plus2h, p, q, m, g, block_one_plus_two);
+	compute_block_hash(b1plus2h, p, m, g, block_one_plus_two);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for hash of b(1+2) = %f\n", cpu_time_used);

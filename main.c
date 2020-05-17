@@ -61,96 +61,36 @@ int main(int argc, char *argv[]){
 	// n is used as seed for instance
 	generate_g(m, g, p, *nb_blocks);
 
-	// Extract block 1 and 2
-	/*printf("Extracting blocks\n");
-	mpz_t *block1, *block2;
-	extract_block(&block1, 0, m, f);
-	extract_block(&block2, 1, m, f);*/
-
-	auxblock *cpb;
-
+	//Compute hash of file f
+	mpz_t *h_f;
+	start = clock();
+	compute_file_hash(&h_f, p, *nb_blocks, m, g, f);
+	end = clock();
+	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("Time taken for hash computation = %f\n", cpu_time_used);
 
 	//compute compound block 1+2 from f
-	printf("Computing compound block 1 + 2 with struct\n");
+	auxblock *cpb;
 	uint32_t parts1[2] = {0, 1};
 	start = clock();
 	compute_compound_block(&cpb, m, p, q, f, 2, parts1);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", cpu_time_used);
-	clear_compound_block(m, cpb);
 
-	//1+2+3
-	printf("Computing compound block 1 + 2 + 3\n");
-	uint32_t parts2[3] = {0, 1, 2};
+	//Test for equality with function
+	mpz_t auxbhash;
+	mpz_init(auxbhash);
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 3, parts2);
+	bool rop = check_auxblock_hash(auxbhash, p, m, g, h_f, cpb);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for compound block creation = %f\n", cpu_time_used);
-	clear_compound_block(m, cpb);
+	printf("Time taken for hash verification (both calculations) = %f\n", cpu_time_used);
+	printf("Test returns %d\n", rop);
 
-	//5 blocks
-	printf("Computing compound block of 5 blocks\n");
-	uint32_t parts3[5] = {1, 5, 8, 13, 20};
-	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 5, parts3);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for compound block creation = %f\n", cpu_time_used);
-	clear_compound_block(m, cpb);
-	
-	//10?
-	printf("Computing compound block of 10 blocks\n");
-	uint32_t parts4[10] = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55};
-	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 10, parts4);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for compound block creation = %f\n", cpu_time_used);
-	clear_compound_block(m, cpb);
-
-	// Compute hash of block 1, hash of block 2, hash of block 1+2 and product of hashes 1&2
-	/*mpz_t b1h, b2h, b1plus2h, b1htimesb2h;
-	mpz_inits(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
-
-	printf("Compute block hases 1 and 2\n");
-	compute_block_hash(b1h, p, q, m, g, block1);
-	compute_block_hash(b2h, p, q, m, g, block2);
-
-	printf("Compute block hash of block(1+2)\n");
-	start = clock();
-	compute_block_hash(b1plus2h, p, q, m, g, block_one_plus_two->block);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for hash of b(1+2) = %f\n", cpu_time_used);
-	
-	printf("Compute product of block hash 1 and block hash 2\n");
-	mpz_addmul(b1htimesb2h, b1h, b2h);
-	mpz_mod(b1htimesb2h, b1htimesb2h, p);
-
-	// Print values
-	gmp_printf("Hash of sum of blocks = %Zd\n", b1plus2h);
-	gmp_printf("Product of hashes of blocks =  %Zd\n", b1htimesb2h);
-
-	// Assert equality
-	int equal = mpz_cmp(b1plus2h, b1htimesb2h);
-	printf("Equality check (0 if equal) : %d\n", equal);*/
-
-	//Checking
-	/*printf("Block extract for block1:\n");
-	gmp_printf("%Zd\n%Zd\n%Zd\n", block1[0], block1[1], block1[m-1]);
-	printf("Block extract for block2:\n");
-	gmp_printf("%Zd\n%Zd\n%Zd\n", block2[0], block2[1], block2[m-1]);
-	printf("Block extract for block 1+2 via struct:\n");
-	gmp_printf("%Zd\n%Zd\n%Zd\n", block_one_plus_two->block[0], block_one_plus_two->block[1], block_one_plus_two->block[m-1]);*/
-
-	// Clearing temporary values that serve to verify homomorphy
-	//free_block(m, block1);
-	//free_block(m, block2);
-	//mpz_clears(b1h, b2h, b1plus2h, b1htimesb2h, NULL);
-	
 	// Clearing file values
+	free_block(m, h_f);
+	clear_compound_block(m, cpb);
 	free_blocks(*nb_blocks, m, f);
 	free(nb_blocks);
 

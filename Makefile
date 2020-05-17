@@ -18,7 +18,7 @@ generate:
 	python3 generate_p_from_q.py
 
 clean: 
-	rm main filetest homomorphytest auxblocktest
+	rm main filetest homomorphytest hashtime auxblocktest
 .PHONY: clean
 
 all: main homomorphytest filetest hashtime auxblocktest
