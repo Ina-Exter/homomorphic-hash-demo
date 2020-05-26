@@ -126,7 +126,7 @@ bool check_auxblock_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t *h
 		current_block = auxb->parts[i];
 		mpz_set(bfactor, auxb->coeffs[i]);
 		mpz_set(agg, h_f[current_block]);
-		mpz_powm(agg, agg, bfactor, p);
+		mpz_powm_sec(agg, agg, bfactor, p);
 		mpz_mul(verify, verify, agg);
 		mpz_mod(verify, verify, p);	
 	}
@@ -135,6 +135,8 @@ bool check_auxblock_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t *h
 
 	int comp = mpz_cmp(auxblockhash, verify);
 
-	return (comp == 0);
+	gmp_printf("Debug: function verfiy hash: %Zd\n", verify);
+
+	return comp;
 
 }

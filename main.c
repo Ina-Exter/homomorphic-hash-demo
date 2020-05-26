@@ -62,34 +62,81 @@ int main(int argc, char *argv[]){
 	generate_g(m, g, p, *nb_blocks);
 
 	//Compute hash of file f
+	printf("Computing hash of file (LONG i.e. 300-500s for large files i.e. 32+ MB)\n");
 	mpz_t *h_f;
-	start = clock();
 	compute_file_hash(&h_f, p, *nb_blocks, m, g, f);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for hash computation = %f\n", cpu_time_used);
-
+	
 	//compute compound block 1+2 from f
+	printf("Computing compound block\n");
 	auxblock *cpb;
 	uint32_t parts1[2] = {0, 1};
-	start = clock();
 	compute_compound_block(&cpb, m, p, q, f, 2, parts1);
-	end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	printf("Time taken for compound block creation = %f\n", cpu_time_used);
 
-	//Test for equality with function
-	mpz_t auxbhash;
-	mpz_init(auxbhash);
-	start = clock();
+	//Decomposition of "hashes.c" check_auxblock_hash function
+	
+	//The following uncommented code mimics the following commented code:
+	/*start = clock();
 	bool rop = check_auxblock_hash(auxbhash, p, m, g, h_f, cpb);
 	end = clock();
 	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for hash verification (both calculations) = %f\n", cpu_time_used);
-	printf("Test returns %d\n", rop);
+	printf("Test returns %d\n", rop);*/
+
+	mpz_t auxblockhash, verify, bfactor;
+	uint32_t current_block;
+	mpz_init(auxblockhash); 
+	mpz_init_set_str(verify, "1", 10);
+	mpz_init(bfactor);
+
+	//Time the raw hash calculation
+	printf("Calculating auxiliary block hash\n");
+	start = clock();
+	compute_block_hash(auxblockhash, p, m, g, cpb->block);
+	end = clock();
+	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("Time taken for auxblock hash computation = %f\n", cpu_time_used);
+
+
+	mpz_t agg;
+	mpz_init(agg);
+
+	//Time the verification
+	printf("Calculating auxblock verification hash based on hash of file\n");
+	start = clock();
+	for (uint32_t i = 0; i < cpb->degree; i++) {
+		current_block = cpb->parts[i];
+		gmp_printf("For i=%d, block number=%d, coeff is %Zd\n", i, current_block, cpb->coeffs[i]);
+		mpz_set(bfactor, cpb->coeffs[i]);
+		mpz_set(agg, h_f[current_block]);
+		mpz_powm_sec(agg, agg, bfactor, p);
+		mpz_mul(verify, verify, agg);
+		mpz_mod(verify, verify, p);	
+	}
+	end = clock();
+	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("Time taken for verification hash computation = %f\n", cpu_time_used);
+
+	mpz_clears(bfactor, agg, NULL);
+
+	int comp = mpz_cmp(auxblockhash, verify);
+	printf("Checking equality (0 if equal) %d\n", comp);
+
+	printf("Checking with function (match results)\n");
+	mpz_t auxbhash;
+	mpz_init(auxbhash);	
+	bool rop = check_auxblock_hash(auxbhash, p, m, g, h_f, cpb);
+	printf("Equality through func: %d\n", rop);
+
+	int cmpeq = mpz_cmp(auxblockhash, auxbhash);
+	printf("Debug: check if both auxblockhashes are equal %d\n", cmpeq);
+	mpz_clear(auxbhash);
+
+	gmp_printf("Debug: verify_hash: %Zd\n", verify);
+
+	gmp_printf("Debug: auxblockhash: %Zd\n", auxblockhash);
 
 	// Clearing file values
-	free_block(m, h_f);
+	free_block(*nb_blocks, h_f);
 	clear_compound_block(m, cpb);
 	free_blocks(*nb_blocks, m, f);
 	free(nb_blocks);

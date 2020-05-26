@@ -196,6 +196,7 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 		// Compute random val
 		mpz_urandomm(argument, state, q);
 		//Store it
+		gmp_printf("Computation of auxblock: For i=%d, block number=%d, coeff is %Zd\n", i, parts[i], argument);
 		mpz_set(c[i], argument);
 		//Multiply random val and extracted block
 		for (uint32_t k = 0; k < m; k++) {
