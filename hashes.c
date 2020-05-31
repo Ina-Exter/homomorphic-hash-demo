@@ -13,10 +13,12 @@ void compute_block_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t b[m
 		//gmp_printf("Value of buff = %Zd\n", buff);
 		// Aggregate in hash
 		mpz_mul(hash, hash, buff);
+		//Mod here may not be optimal from a number-of-operations standpoint, but it does greatly reduce the amount of data in memory
+		mpz_mod(hash, hash, p);
 	}
 	
-	//Last modulo
-	mpz_mod(hash, hash, p);
+	//Last modulo (now in loop)
+	//mpz_mod(hash, hash, p);
 	//copy hash into result
 	mpz_set(result, hash);
 	//free
@@ -44,6 +46,36 @@ void generate_g(uint32_t m, mpz_t g[m], mpz_t p, uint32_t seed) {
 		mpz_urandomm(g[i], state, p);
 	}
 	gmp_randclear(state);
+}
+
+void generate_g_with_pq_exp(uint32_t m, mpz_t g[m], mpz_t p, mpz_t q, uint32_t seed) {
+
+	// Initialize g
+	for (uint32_t i = 0; i < m; i++) {
+		mpz_init(g[i]);
+	}
+	
+	// Initialize state
+	gmp_randstate_t state;
+	gmp_randinit_default(state);
+	gmp_randseed_ui(state, (unsigned long int)seed);
+	
+	mpz_t ratio;
+	mpz_init(ratio);
+	mpz_sub_ui(ratio, p, 1);
+	//We know that q|(p-1)
+	mpz_divexact(ratio, ratio, q);
+
+	// Compute g[i]
+	for (uint32_t i = 0; i < m; i++) {
+		// Select g0[i]
+		mpz_urandomm(g[i], state, q);
+		// Exponentiation
+		mpz_powm_sec(g[i], g[i], ratio, p);
+	}
+	mpz_clear(ratio);
+	gmp_randclear(state);
+
 }
 
 void clear_mpz_vector(uint32_t size, mpz_t *vector) {
@@ -135,7 +167,10 @@ bool check_auxblock_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t *h
 
 	int comp = mpz_cmp(auxblockhash, verify);
 
+	gmp_printf("Debug: function block hash: %Zd\n", auxblockhash);
 	gmp_printf("Debug: function verfiy hash: %Zd\n", verify);
+
+	mpz_clears(auxblockhash, verify, NULL);
 
 	return comp;
 

@@ -197,15 +197,15 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 		mpz_urandomm(argument, state, q);
 		//Store it
 		gmp_printf("Computation of auxblock: For i=%d, block number=%d, coeff is %Zd\n", i, parts[i], argument);
+		//mpz_set_str(c[i], "1", 10);
 		mpz_set(c[i], argument);
 		//Multiply random val and extracted block
 		for (uint32_t k = 0; k < m; k++) {
-			mpz_mul(extracted_block[k], extracted_block[k], argument);
-			mpz_mod(extracted_block[k], extracted_block[k], p);
-		}
-		for (uint32_t j = 0; j < m; j++) {
-			//printf("Add b[%u] and extracted_block[%u]\n", j, j);
-			mpz_add(b[j], b[j], extracted_block[j]);
+			mpz_mul(extracted_block[k], extracted_block[k], c[i]);
+			//This might be mod q. Just in case, deactivate it and check how it goes
+			//mpz_mod(extracted_block[k], extracted_block[k], p);
+			//printf("Add b[%u] and extracted_block[%u]\n", k, k);
+			mpz_add(b[k], b[k], extracted_block[k]);
 		}
 		//printf("Freeing block %u\n", parts[i]);
 		free_block(m, extracted_block);

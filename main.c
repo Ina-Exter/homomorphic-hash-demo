@@ -59,7 +59,8 @@ int main(int argc, char *argv[]){
 	// Generate a vector g
 	mpz_t g[m];
 	// n is used as seed for instance
-	generate_g(m, g, p, *nb_blocks);
+	generate_g_with_pq_exp(m, g, p, q, *nb_blocks);
+	//generate_g(m, g, p, *nb_blocks);
 
 	//Compute hash of file f
 	printf("Computing hash of file (LONG i.e. 300-500s for large files i.e. 32+ MB)\n");
@@ -134,6 +135,9 @@ int main(int argc, char *argv[]){
 	gmp_printf("Debug: verify_hash: %Zd\n", verify);
 
 	gmp_printf("Debug: auxblockhash: %Zd\n", auxblockhash);
+
+	// Clearing verification values
+	mpz_clears(verify, auxblockhash, NULL); 
 
 	// Clearing file values
 	free_block(*nb_blocks, h_f);
