@@ -1,6 +1,6 @@
 
-main: main.c hashes.c shards.c
-	gcc -std=c99 -Wall -Wextra -o main main.c hashes.c shards.c -lgmp -lm
+auxblockverifytime: auxblockverifytime.c hashes.c shards.c
+	gcc -std=c99 -Wall -Wextra -o auxblockverifytime auxblockverifytime.c hashes.c shards.c -lgmp -lm
 
 homomorphytest: homomorphytest.c hashes.c
 	gcc -std=c99 -o homomorphytest homomorphytest.c hashes.c shards.c -lgmp -lm
@@ -18,9 +18,9 @@ generate:
 	python3 generate_p_from_q.py
 
 clean: 
-	rm main filetest homomorphytest hashtime auxblocktest
+	rm auxblockverifytime filetest homomorphytest hashtime auxblocktest
 .PHONY: clean
 
-all: main homomorphytest filetest hashtime auxblocktest
+all: auxblockverifytime homomorphytest filetest hashtime auxblocktest
 .PHONY: all
 

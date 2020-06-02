@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "This script uses sudo to install some dependancies, and apt-get as packet manager."
+echo "This script uses sudo to install some dependancies, and apt-get as packet manager. Tested on my Debian 10 exclusively."
 
 # Getting dependancies
 sudo apt-get update

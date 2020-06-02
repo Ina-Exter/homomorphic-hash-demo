@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block 1 + 2 with struct\n");
 	uint32_t parts1[2] = {0, 1};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 2, parts1);
+	compute_compound_block(&cpb, m, q, f, 2, parts1);
 	end = clock();
 	t1 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t1);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block 1 + 2 + 3\n");
 	uint32_t parts2[3] = {0, 1, 2};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 3, parts2);
+	compute_compound_block(&cpb, m, q, f, 3, parts2);
 	end = clock();
 	t2 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t2);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block of 5 blocks\n");
 	uint32_t parts3[5] = {1, 5, 8, 13, 20};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 5, parts3);
+	compute_compound_block(&cpb, m, q, f, 5, parts3);
 	end = clock();
 	t3 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t3);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block of 10 blocks\n");
 	uint32_t parts4[10] = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 10, parts4);
+	compute_compound_block(&cpb, m, q, f, 10, parts4);
 	end = clock();
 	t4 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t4);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block of 20 blocks\n");
 	uint32_t parts5[20] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 20, parts5);
+	compute_compound_block(&cpb, m, q, f, 20, parts5);
 	end = clock();
 	t5 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t5);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block of 30 blocks\n");
 	uint32_t parts6[30] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 30, parts6);
+	compute_compound_block(&cpb, m, q, f, 30, parts6);
 	end = clock();
 	t6 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t6);
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block of 50 blocks\n");
 	uint32_t parts7[50] = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 97, 99};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 50, parts7);
+	compute_compound_block(&cpb, m, q, f, 50, parts7);
 	end = clock();
 	t7 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t7);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]){
 	printf("Computing compound block of 100 blocks\n");
 	uint32_t parts8[100] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99};
 	start = clock();
-	compute_compound_block(&cpb, m, p, q, f, 100, parts8);
+	compute_compound_block(&cpb, m, q, f, 100, parts8);
 	end = clock();
 	t8 = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken for compound block creation = %f\n", t8);

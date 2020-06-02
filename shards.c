@@ -147,7 +147,7 @@ void free_block(uint32_t m, mpz_t *block) {
 
 }
 
-void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]) {
+void compute_compound_block(auxblock **result, uint32_t m, mpz_t q, mpz_t *matrix, uint32_t degree, uint32_t parts[degree]) {
 
 
 	//Malloc the struct
@@ -196,7 +196,7 @@ void compute_compound_block(auxblock **result, uint32_t m, mpz_t p, mpz_t q, mpz
 		// Compute random val
 		mpz_urandomm(argument, state, q);
 		//Store it
-		gmp_printf("Computation of auxblock: For i=%d, block number=%d, coeff is %Zd\n", i, parts[i], argument);
+		//gmp_printf("Computation of auxblock: For i=%d, block number=%d, coeff is %Zd\n", i, parts[i], argument);
 		//mpz_set_str(c[i], "1", 10);
 		mpz_set(c[i], argument);
 		//Multiply random val and extracted block

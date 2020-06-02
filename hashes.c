@@ -167,8 +167,8 @@ bool check_auxblock_hash(mpz_t result, mpz_t p, uint32_t m, mpz_t g[m], mpz_t *h
 
 	int comp = mpz_cmp(auxblockhash, verify);
 
-	gmp_printf("Debug: function block hash: %Zd\n", auxblockhash);
-	gmp_printf("Debug: function verfiy hash: %Zd\n", verify);
+	//gmp_printf("Debug: function block hash: %Zd\n", auxblockhash);
+	//gmp_printf("Debug: function verfiy hash: %Zd\n", verify);
 
 	mpz_clears(auxblockhash, verify, NULL);
 
