@@ -12,7 +12,7 @@ wget https://gmplib.org/download/gmp/gmp-6.2.0.tar.xz
 tar -xf gmp-6.2.0.tar.xz
 
 # Installing GNU MP
-cd gmp-6.2.0.tar.xz || exit
+cd gmp-6.2.0 || exit
 ./configure
 make check
 make install
