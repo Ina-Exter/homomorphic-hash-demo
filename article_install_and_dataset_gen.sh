@@ -16,8 +16,9 @@ tar -xf gmp-6.2.0.tar.xz
 # Installing GNU MP
 cd gmp-6.2.0 || exit
 ./configure
-make check
-make install
+sudo make
+sudo make check
+sudo make install
 
 # Just in case.
 sudo cp /usr/local/lib/libgmp.a /usr/lib/

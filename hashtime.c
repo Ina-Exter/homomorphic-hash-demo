@@ -67,13 +67,13 @@ int main(int argc, char *argv[]){
 	test_file = fopen(argv[1], "r");
 	uint64_t test_file_size = read_file_size(test_file);
 	fclose(test_file);
-	printf("Time taken for hash of file size %lu = %f\n", test_file_size, cpu_time_used);
+	printf("Time taken for hash of file size %" PRIu64" = %f\n", test_file_size, cpu_time_used);
 
 	char *datafilename;
 	datafilename = malloc(1000*sizeof(char));
 	sprintf(datafilename, "data_beta_%u_m_%u.csv", beta, m);
 	data_file=fopen(datafilename, "a");
-	fprintf(data_file, "%lu, %f\n", test_file_size, cpu_time_used);
+	fprintf(data_file, "%" PRIu64", %f\n", test_file_size, cpu_time_used);
 	fclose(data_file);
 
 	free(datafilename);
