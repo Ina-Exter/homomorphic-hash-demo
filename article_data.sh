@@ -3,6 +3,18 @@
 make clean
 make all
 
+# Hash times
+
+./generate_dataset.sh 64 16
+./generate_dataset.sh 1024 128
+./generate_dataset.sh 2048 128
+./generate_dataset.sh 32768 1024
+./generate_dataset.sh 65536 512
+
+
+mkdir data_hash_times
+mv data_beta* data_hash_times/
+
 # Auxblock times
 
 head -c 10M </dev/urandom >"testfile_10m"
