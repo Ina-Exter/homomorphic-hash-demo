@@ -17,6 +17,18 @@ auxblocktest: auxblocktest.c hashes.c shards.c
 generate:
 	python3 generate_p_from_q.py
 
+separatedegree:
+	gcc -std=c99 -Wall -Wextra -o auxblocktest_d4 auxblocktest_degree4.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblockverifytime_d4 auxblockverifytime_degree4.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblocktest_d32 auxblocktest_degree32.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblockverifytime_d32 auxblockverifytime_degree32.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblocktest_d64 auxblocktest_degree64.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblockverifytime_d64 auxblockverifytime_degree64.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblocktest_d128 auxblocktest_degree128.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblockverifytime_d128 auxblockverifytime_degree128.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblocktest_d256 auxblocktest_degree256.c hashes.c shards.c -lgmp -lm
+	gcc -std=c99 -Wall -Wextra -o auxblockverifytime_d256 auxblockverifytime_degree256.c hashes.c shards.c -lgmp -lm
+
 clean: 
 	rm auxblockverifytime filetest homomorphytest hashtime auxblocktest
 .PHONY: clean
